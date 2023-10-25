@@ -1,27 +1,70 @@
-import Header from './components/Header/Header'
-import Hero from './components/Hero/Hero';
+import { Suspense, useState } from 'react';
+import Website from './pages/Website';
+import {BrowserRouter, Route, Routes} from 'react-router-dom'; //navigation diff pages without full aplication reloads
+import Layout from './components/Layout/Layout';
 import "./App.css"
-import Companies from './components/Companies/Companies';
-import Residencies from './components/Residencies/Residencies';
-import Value from './components/Value/Value';
-import Contact from './components/Contact/Contact';
-import GetStarted from './components/GetStarted/GetStarted';
-import Footer from './components/Footer/Footer';
+import Properties from './pages/Properties/Properties';
+import Property from './pages/Property/Property';
+
+
+//react-query
+import {QueryClient, QueryClientProvider} from 'react-query';
+//managing and monitoring data in React applications that use React Query
+import {ReactQueryDevtools} from 'react-query/devtools';
+
+//toasters
+import { ToastContainer } from 'react-toastify';
+import "react-toastify/dist/ReactToastify.css"; //inbuilt
+
+//context provider to keep the global info of the user who logged in
+import UserDetailContext from './context/UserDetailContext';
+
+
+
 function App() {
+  const queryClient=new QueryClient();
+
+  //we use this to store some global informations
+  const [userDetails,setUserDetails]=useState({
+    favourites:[],
+    bookings:[],
+    token:null
+  });
+
+
   return (
-    <div className="App">
-      <div>
-        <div className="white-gradient"/>
-        <Header/>
-        <Hero/>
-      </div>
-      <Companies/>
-      <Residencies/>
-      <Value/>
-      <Contact/>
-      <GetStarted/>
-      <Footer/>
-    </div>
+  //our user would be available throughout the application
+  <UserDetailContext.Provider value={{userDetails,setUserDetails}}>
+
+
+    <QueryClientProvider client={queryClient}>
+      <BrowserRouter>
+ 
+        <Suspense fallback={<div>Loading...</div>}>
+          <Routes>
+
+            <Route element={<Layout/>}>
+
+              <Route path='/' element={<Website />}/>
+
+              <Route path='/properties'>
+                <Route index element={<Properties/>}/>
+                <Route path=":propertyId" element={<Property/>}/>
+              </Route>
+
+            </Route>
+
+          </Routes>
+        </Suspense>
+      </BrowserRouter>
+      <ToastContainer/>
+      <ReactQueryDevtools initialIsOpen={false}/>
+    </QueryClientProvider>
+
+
+  </UserDetailContext.Provider>
+ 
+    
   );
 }
 

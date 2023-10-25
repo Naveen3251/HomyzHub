@@ -2,9 +2,26 @@ import React,{useState} from "react";
 import './Header.css'
 import {BiMenuAltRight} from 'react-icons/bi';
 import OutsideClickHandler from "react-outside-click-handler";
+import { Link, NavLink } from "react-router-dom"; 
+//custom comp
+import ProfileMenu from "../ProfileMenu/ProfileMenu";
+
+//hooks
+import useHeaderColor from '../../hooks/useHeaderColor';
+
+//authentication hooks
+import { useAuth0 } from "@auth0/auth0-react";
+
+
+
 
 const Header=()=>{
     const [menuOpened,setMenuOpened]=useState(false);
+    const headerColor=useHeaderColor();
+
+    //authentication
+    const {loginWithRedirect,isAuthenticated,user,logout}=useAuth0()
+
     const getMenuStyles=(menuOpened)=>{
         //for the mob screen
         if(document.documentElement.clientWidth<=800){
@@ -13,9 +30,12 @@ const Header=()=>{
         }
     }
     return(
-        <section className="h-wrapper">
+        <section className="h-wrapper" style={{ background: headerColor }}>
             <div className="flexCenter paddings innerWidth h-container">
-                <img src="./logo.png" alt="logo" width={100}/>
+                {/*logo*/}
+                <Link to='/'>
+                    <img src="./logo.png" alt="logo" width={100}/>
+                </Link>
 
 
                 <OutsideClickHandler
@@ -23,30 +43,27 @@ const Header=()=>{
                         setMenuOpened(false);
                     }}
                 >
-                <div className="flexCenter h-menu"
-                    style={getMenuStyles(menuOpened)}
-                >
-                    <a href="">
-                        Recidencies
-                    </a>
-                    <a href="">
-                        Our Value    
-                    </a>
-                    <a href="">
-                        Contact Us
-                    </a>
-                    <a href="">
-                        Get Started
-                    </a>
+                    <div className="flexCenter h-menu"
+                        style={getMenuStyles(menuOpened)}
+                    >
+                        <NavLink to='/properties'>Properties</NavLink>
 
-                    <button className="button">
-                        <a href="">
-                            Contact
-                        </a>
-                    </button>
+                        <a href="mailto:naveensakthivel3251@gmail.com">Contact</a>
                     
+                        {/*login or logout button*/}
+                        {
+                            !isAuthenticated ? (
+                                <button className="button" onClick={loginWithRedirect}>
+                                    Login
+                                </button>
+                            ):(
+                                
+                                    <ProfileMenu user={user} logout={logout}/>
+                                
+                            )
+                        } 
 
-                </div>
+                    </div>
                 </OutsideClickHandler>
 
                 <div className="menu-icon" onClick={()=>setMenuOpened((prev)=>!prev)}>
